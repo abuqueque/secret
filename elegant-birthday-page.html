@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px; /* Adjust this value as needed */
+            margin: 0 auto;
+        }
+
+        .photo-gallery {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .photo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .photo.active {
+            opacity: 1;
+        }
+
+        .music-player {
+            width: 100%;
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .song-info {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .song-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .artist {
+            font-size: 1rem;
+            color: #666;
+        }
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .btn-prev {
+            background-image: url('button/backward_122345.png');
+            width: 30px;
+            height: 30px;
+        }
+        .btn-play {
+            background-image: url('button/play-button_109197.png');
+            width: 40px;
+            height: 40px;
+        }
+        .btn-pause {
+            background-image: url('button/pause-button_64594.png');
+            width: 40px;
+            height: 40px;
+            display: none;
+        }
+        .btn-next {
+            background-image: url('button/fast-forward_122346.png');
+            width: 30px;
+            height: 30px;
+        }
+        .progress-container {
+            background-color: #e9ecef;
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        .progress-bar {
+            background-color: #007bff;
+            height: 100%;
+            width: 0;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .letters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+        .letter-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1rem;
+        }
+        .letter-btn:hover {
+            background-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .letter-text {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        @media (max-width: 768px) {
+            .content {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(-1000px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            }
+            .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            transform: rotate(-45deg);
+            animation: float 5s infinite ease-in-out;
+            }
+            .heart::before,
+            .heart::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            }
+            .heart::before {
+            top: -10px;
+            left: 0;
+            }
+            .heart::after {
+            left: 10px;
+            top: 0;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Happy Birthday, My Love</h1>
+            <p class="subtitle">A celebration of our journey together</p>
+        </header>
+        <div class="content">
+            <div class="photo-gallery" id="photoGallery"></div>
+            <div class="music-player">
+                <div class="song-info">
+                    <div class="song-title" id="songTitle"></div>
+                    <div class="artist" id="artistName"></div>
+                </div>
+                <div class="player-controls">
+                    <button class="btn btn-prev" id="prevBtn"></button>
+                    <button class="btn btn-play" id="playBtn"></button>
+                    <button class="btn btn-pause" id="pauseBtn"></button>
+                    <button class="btn btn-next" id="nextBtn"></button>
+                </div>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+            <div class="letters" id="letterButtons"></div>
+        </div>
+    </div>
+
+    <div id="letterModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="letter-text" id="letterText"></p>
+        </div>
+    </div>
+
+    <!-- Floating Hearts -->
+    <!-- Line 1 -->
+    <div class="heart" style="left: 5%; animation-delay: 0s;"></div>
+    <div class="heart" style="left: 5%; animation-delay: 1s;"></div>
+    <div class="heart" style="left: 5%; animation-delay: 2s;"></div>
+    <div class="heart" style="left: 5%; animation-delay: 3s;"></div>
+    <div class="heart" style="left: 5%; animation-delay: 4s;"></div>
+
+    <!-- Line 2 -->
+    <div class="heart" style="left: 15%; animation-delay: 0.5s;"></div>
+    <div class="heart" style="left: 15%; animation-delay: 1.5s;"></div>
+    <div class="heart" style="left: 15%; animation-delay: 2.5s;"></div>
+    <div class="heart" style="left: 15%; animation-delay: 3.5s;"></div>
+    <div class="heart" style="left: 15%; animation-delay: 4.5s;"></div>
+
+    <!-- Line 3 -->
+    <div class="heart" style="left: 25%; animation-delay: 1s;"></div>
+    <div class="heart" style="left: 25%; animation-delay: 2s;"></div>
+    <div class="heart" style="left: 25%; animation-delay: 3s;"></div>
+    <div class="heart" style="left: 25%; animation-delay: 4s;"></div>
+    <div class="heart" style="left: 25%; animation-delay: 5s;"></div>
+
+    <!-- Line 4 -->
+    <div class="heart" style="left: 35%; animation-delay: 1.5s;"></div>
+    <div class="heart" style="left: 35%; animation-delay: 2.5s;"></div>
+    <div class="heart" style="left: 35%; animation-delay: 3.5s;"></div>
+    <div class="heart" style="left: 35%; animation-delay: 4.5s;"></div>
+    <div class="heart" style="left: 35%; animation-delay: 5.5s;"></div>
+
+    <!-- Line 5 -->
+    <div class="heart" style="left: 45%; animation-delay: 2s;"></div>
+    <div class="heart" style="left: 45%; animation-delay: 3s;"></div>
+    <div class="heart" style="left: 45%; animation-delay: 4s;"></div>
+    <div class="heart" style="left: 45%; animation-delay: 5s;"></div>
+    <div class="heart" style="left: 45%; animation-delay: 6s;"></div>
+
+    <!-- Line 6 -->
+    <div class="heart" style="left: 55%; animation-delay: 2.5s;"></div>
+    <div class="heart" style="left: 55%; animation-delay: 3.5s;"></div>
+    <div class="heart" style="left: 55%; animation-delay: 4.5s;"></div>
+    <div class="heart" style="left: 55%; animation-delay: 5.5s;"></div>
+    <div class="heart" style="left: 55%; animation-delay: 6.5s;"></div>
+
+    <!-- Line 7 -->
+    <div class="heart" style="left: 65%; animation-delay: 3s;"></div>
+    <div class="heart" style="left: 65%; animation-delay: 4s;"></div>
+    <div class="heart" style="left: 65%; animation-delay: 5s;"></div>
+    <div class="heart" style="left: 65%; animation-delay: 6s;"></div>
+    <div class="heart" style="left: 65%; animation-delay: 7s;"></div>
+
+    <!-- Line 8 -->
+    <div class="heart" style="left: 75%; animation-delay: 3.5s;"></div>
+    <div class="heart" style="left: 75%; animation-delay: 4.5s;"></div>
+    <div class="heart" style="left: 75%; animation-delay: 5.5s;"></div>
+    <div class="heart" style="left: 75%; animation-delay: 6.5s;"></div>
+    <div class="heart" style="left: 75%; animation-delay: 7.5s;"></div>
+
+    <!-- Line 9 -->
+    <div class="heart" style="left: 85%; animation-delay: 4s;"></div>
+    <div class="heart" style="left: 85%; animation-delay: 5s;"></div>
+    <div class="heart" style="left: 85%; animation-delay: 6s;"></div>
+    <div class="heart" style="left: 85%; animation-delay: 7s;"></div>
+    <div class="heart" style="left: 85%; animation-delay: 8s;"></div>
+
+    <!-- Line 10 -->
+    <div class="heart" style="left: 95%; animation-delay: 4.5s;"></div>
+    <div class="heart" style="left: 95%; animation-delay: 5.5s;"></div>
+    <div class="heart" style="left: 95%; animation-delay: 6.5s;"></div>
+    <div class="heart" style="left: 95%; animation-delay: 7.5s;"></div>
+    <div class="heart" style="left: 95%; animation-delay: 8.5s;"></div>
+
+
+    <script>
+        const playlist = [
+        { title: "在这座城市遗失了你", artist: "高无人", file: "./audio/在這座城市遺失了你.mp3" },
+        { title: "First Dance", artist: "Another Artist", file: "./audio/first-dance.mp3" },
+        { title: "Special Moment", artist: "Lovely Singer", file: "./audio/special-moment.mp3" },
+        { title: "Romantic Ballad", artist: "Sweet Voice", file: "./audio/romantic-ballad.mp3" },
+        { title: "Happy Together", artist: "Joyful Band", file: "./audio/happy-together.mp3" }
+    ];
+
+        const photos = [
+            "images/IMG_8273.JPEG",
+            "images/image2.JPEG",
+            "path/to/photo3.jpg"
+        ];
+
+        const letters = [
+            "My dearest, your love fills my heart with joy every single day...",
+            "Remember when we first met? That moment changed my life forever...",
+            "Your smile brightens my world. I'm so grateful to have you in my life..."
+        ];
+
+        let currentSongIndex = 0;
+        let sound;
+        let currentPhotoIndex = 0;
+
+        function formatTime(secs) {
+            const minutes = Math.floor(secs / 60);
+            const seconds = Math.floor(secs % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updatePlayerInfo() {
+            document.getElementById('songTitle').textContent = playlist[currentSongIndex].title;
+            document.getElementById('artistName').textContent = playlist[currentSongIndex].artist;
+        }
+
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const currentTime = document.getElementById('currentTime');
+            const duration = document.getElementById('duration');
+
+            if (sound) {
+                const seek = sound.seek() || 0;
+                const totalDuration = sound.duration() || 0;
+                progressBar.style.width = `${(seek / totalDuration) * 100}%`;
+                currentTime.textContent = formatTime(seek);
+                duration.textContent = formatTime(totalDuration);
+                requestAnimationFrame(updateProgressBar);
+            }
+        }
+
+        function playSong() {
+            if (sound) sound.stop();
+            sound = new Howl({
+                src: [playlist[currentSongIndex].file],
+                html5: true,
+                onplay: () => {
+                    requestAnimationFrame(updateProgressBar);
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+                },
+                onload: () => {
+                    const duration = document.getElementById('duration');
+                    duration.textContent = formatTime(sound.duration());
+                },
+                onend: nextSong,
+                onloaderror: (id, error) => {
+                    console.error('Error loading audio:', error);
+                    alert(`Error loading audio: ${playlist[currentSongIndex].title}. Please check the file path.`);
+                }
+            });
+            sound.play();
+        }
+
+        function pauseSong() {
+            if (sound) sound.pause();
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            updatePlayerInfo();
+            playSong();
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            updatePlayerInfo();
+            playSong();
+        }
+
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+
+        playBtn.addEventListener('click', playSong);
+        pauseBtn.addEventListener('click', pauseSong);
+        nextBtn.addEventListener('click', nextSong);
+        prevBtn.addEventListener('click', prevSong);
+
+        document.getElementById('progressContainer').addEventListener('click', (e) => {
+            const progressContainer = e.target;
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = sound.duration();
+
+            sound.seek((clickX / width) * duration);
+        });
+
+        function showPhoto(index) {
+            const photoGallery = document.getElementById('photoGallery');
+            photoGallery.innerHTML = '';
+            const photo = document.createElement('img');
+            photo.src = photos[index];
+            photo.classList.add('photo');
+            photoGallery.appendChild(photo);
+
+            setTimeout(() => {
+                photo.classList.add('active');
+            }, 10);
+        }
+
+        function nextPhoto() {
+            currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+            showPhoto(currentPhotoIndex);
+        }
+
+        setInterval(nextPhoto, 5000);
+        showPhoto(currentPhotoIndex);
+
+        const letterButtonsContainer = document.getElementById('letterButtons');
+        letters.forEach((letter, index) => {
+            const button = document.createElement('button');
+            button.classList.add('letter-btn');
+            button.textContent = `Letter ${index + 1}`;
+            button.addEventListener('click', () => {
+                document.getElementById('letterText').textContent = letter;
+                document.getElementById('letterModal').style.display = 'block';
+            });
+            letterButtonsContainer.appendChild(button);
+        });
+
+        document.querySelector('.modal .close').addEventListener('click', () => {
+            document.getElementById('letterModal').style.display = 'none';
+        });
+
+        updatePlayerInfo();
+    </script>
+</body>
+</html>
